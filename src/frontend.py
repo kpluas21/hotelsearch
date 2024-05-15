@@ -13,9 +13,10 @@ def handle_query(dict):
     if query_result is None:
         ui.label(text="Nothing found!")
     else:
-        query_result = query_result.find('div', {'data-stid': 'property-listing-results'})
+        query_result = query_result.find('div', {'data-stid': 'property-listing-results'}) 
+
         html_string = str(query_result)
-        query_result_render = ui.html(html_string).bind_content(html_string)
+        query_result_render = ui.html(html_string)
             
                 
 
