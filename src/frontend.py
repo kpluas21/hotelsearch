@@ -31,9 +31,6 @@ def init(fastapi_app: FastAPI) -> None:
 
         with ui.card():
             with ui.row():
-                location = ""
-                from_date = ""
-                to_date = ""
                 #Location
                 with ui.input('Location', placeholder='Where do you want to go?', 
                             on_change=lambda e: location.set_text(e.value)).add_slot('append'):
@@ -69,11 +66,13 @@ def init(fastapi_app: FastAPI) -> None:
                 #     {'location':result.text, 'from_date':from_date.text, 'to_date':to_date.text}
                 # ))
 
-
+                location = ui.label()
+                from_date = ui.label()
+                to_date = ui.label()
             ui.button(text="Search", on_click=lambda: handle_query(
-                {'location':location, 
-                'from_date':from_date, 
-                'to_date':to_date, 
+                {'location':location.text, 
+                'from_date':from_date.text, 
+                'to_date':to_date.text, 
                 'num_adults': num_adults_toggle.value,
                 'num_kids': num_kids_toggle.value,
                 'num_rooms': num_rooms_toggle.value}
