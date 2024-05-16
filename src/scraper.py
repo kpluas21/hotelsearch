@@ -15,8 +15,8 @@ async def create_query(strDict):
     date_range = ""
     if strDict['location'] != "":
         strDict['location'] = "destination=" + strDict['location']
-        strDict['location'] = str(strDict['location']).replace(" ", "")
-        strDict['location'] = str(strDict['location']).replace(',', '(and vicinity)%2C')
+        strDict['location'] = str(strDict['location']).replace(',', ' (and vicinity)%2C')
+        strDict['location'] = strDict['location'] + ('%2C United States of America')
     if strDict['from_date'] and strDict['to_date'] != "":
         date_range = f"&d1={strDict['from_date']}&startDate={strDict['from_date']}&d2={strDict['to_date']}&endDate={strDict['to_date']}"
     if strDict['num_adults'] != "":
@@ -30,7 +30,7 @@ async def create_query(strDict):
     # print(strDict['location'])
     # print(date_range)
 
-    query = strDict['location'] + date_range + strDict['num_adults'] + strDict['num_kids'] + strDict['num_rooms'] + "&sort=RECOMMENDED"
+    query = strDict['location'] + date_range + strDict['num_adults'] + strDict['num_kids'] + strDict['num_rooms'] + "&sort=RECOMMENDED&useRewards=false&semdtl=&userIntent=&theme=&allowPreAppliedFilters=false&mapBounds=&pwaDialog="
     print(f"Searching for hotels with query {query}")
     results = await search(query)
     return results
@@ -46,22 +46,23 @@ async def search(query):
         )
         page = await browser.new_page()
         await page.goto(url)
-        time.sleep(2)
-        show_more = page.locator("button", has_text="Show More")
+        time.sleep(4)
+        # show_more = page.locator("button", has_text="Show More")
 
-        # while await show_more.is_visible() is True:
+        # # while await show_more.is_visible() is True:
+        # #     await show_more.click()
+        # #     time.sleep(5)
+
+        # for i in range(5):
         #     await show_more.click()
         #     time.sleep(5)
 
-        for i in range(2):
-            await show_more.click()
-            time.sleep(5)
+        results = await page.locator('[data-stid="lodging-card-responsive"]').all()
 
         listings = []
-        for i in range(10):
-            listing = page.locator('[data-stid="lodging-card-responsive"]').nth(i)
-            listings.append(listing)
-
+        for hotel in results:
+            if await hotel.is_visible():
+                listings.append(hotel)
 
         if len(listings) == 0:
             await browser.close()
@@ -93,7 +94,8 @@ async def search(query):
                 images_locator = await listing.locator('img.uitk-image-media').all()
                 print(f"{len(images_locator)} images located for {title}")
                 for img in images_locator:
-                    images.append(await img.get_attribute('src'))
+                    if await img.is_visible():
+                        images.append(await img.get_attribute('src'))
                     
 
                 hotel = {

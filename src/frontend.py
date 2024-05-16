@@ -22,12 +22,12 @@ async def handle_query(dict):
             with ui.column():
                 with ui.card():
                     ui.label(hotel['title'])
-                    ui.label(hotel['price'] or "NO PRICE")
-                    ui.label(hotel['rating'] or "NO RATING")
+                    with ui.row():
+                        ui.label(hotel['price'] or "NO PRICE")
+                        ui.label(hotel['rating'] or "NO RATING")
                     with ui.row():
                         for image in hotel['images']:
                             ui.image(image)
-                    # ui.image(source=hotel['image'])
         print("Rendering complete!")
                 
                 
