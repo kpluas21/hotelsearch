@@ -2,22 +2,34 @@ from fastapi import FastAPI
 
 from nicegui import app, ui
 from datetime import date as dt
-from bs4 import BeautifulSoup as bs
 
 import scraper
 
+# hotel = {
+#     'title':title,
+#     'price':price,
+#     'rating':rating
+# }
 #A function is defined here to handle the return value of scraper.create_query
-def handle_query(dict):
+async def handle_query(dict):
     #query_result is a soup that we will render shortly
-    query_result = scraper.create_query(dict)
-    if query_result is None:
+    listings = await scraper.create_query(dict)
+    if listings is None:
         ui.label(text="Nothing found!")
     else:
-        query_result = query_result.find('div', {'data-stid': 'property-listing-results'}) 
-
-        html_string = str(query_result)
-        query_result_render = ui.html(html_string)
-            
+        print("Rendering hotels onto NiceGUI")
+        for hotel in listings:
+            with ui.column():
+                with ui.card():
+                    ui.label(hotel['title'])
+                    ui.label(hotel['price'] or "NO PRICE")
+                    ui.label(hotel['rating'] or "NO RATING")
+                    with ui.row():
+                        for image in hotel['images']:
+                            ui.image(image)
+                    # ui.image(source=hotel['image'])
+        print("Rendering complete!")
+                
                 
 
 def init(fastapi_app: FastAPI) -> None:
@@ -61,10 +73,6 @@ def init(fastapi_app: FastAPI) -> None:
                         num_kids_toggle = ui.toggle([0,1,2,3,4,5,6], value=0)
                         ui.label("Rooms")
                         num_rooms_toggle = ui.toggle([1,2,3,4], value=1)
-                # #Search button
-                # ui.button(text="Search", on_click=lambda: scraper.create_query(
-                #     {'location':result.text, 'from_date':from_date.text, 'to_date':to_date.text}
-                # ))
 
                 location = ui.label()
                 from_date = ui.label()
@@ -76,8 +84,7 @@ def init(fastapi_app: FastAPI) -> None:
                 'num_adults': num_adults_toggle.value,
                 'num_kids': num_kids_toggle.value,
                 'num_rooms': num_rooms_toggle.value}
-            ))
-            
+            )) 
 
     ui.run_with(
         fastapi_app,
